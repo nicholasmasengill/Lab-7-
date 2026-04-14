@@ -1,0 +1,66 @@
+﻿@page "/return"
+@using Data
+@inject LAB_5.Services.ILibraryService LibraryService
+@rendermode InteractiveServer
+
+<h3>Return a Book</h3>
+
+<label>Select User:</label>
+<select @bind="selectedUserId" @bind:after="LoadBorrowedBooks">
+    <option value="0">-- Select a User --</option>
+    @foreach (var user in LibraryService.GetUsers())
+    {
+        <option value="@user.Id">@user.Name</option>
+    }
+</select>
+
+@if (borrowedBooks.Count > 0)
+{
+    <h4>Borrowed Books:</h4>
+    <table>
+        <thead>
+            <tr><th>Title</th><th>Author</th><th>ISBN</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < borrowedBooks.Count; i++)
+            {
+                int index = i;
+                <tr>
+                    <td>@borrowedBooks[i].Title</td>
+                    <td>@borrowedBooks[i].Author</td>
+                    <td>@borrowedBooks[i].ISBN</td>
+                    <td><button @onclick="() => SubmitReturn(index)">Return</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (selectedUserId != 0)
+{
+    <p>This user has no borrowed books.</p>
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    int selectedUserId = 0;
+    List<Book> borrowedBooks = new List<Book>();
+    string message = "";
+
+    void LoadBorrowedBooks()
+    {
+        var all = LibraryService.GetBorrowedBooks();
+        borrowedBooks = all.ContainsKey(selectedUserId) ? all[selectedUserId] : new List<Book>();
+        message = "";
+    }
+
+    void SubmitReturn(int index)
+    {
+        LibraryService.ReturnBook(selectedUserId, index);
+        message = "Book returned successfully!";
+        LoadBorrowedBooks();
+    }
+}

@@ -1,0 +1,80 @@
+﻿@page "/users"
+@using Data
+@inject LAB_5.Services.ILibraryService LibraryService
+@rendermode InteractiveServer
+
+<h3>User Management</h3>
+
+<h4>@(editingUser == null ? "Add User" : "Edit User")</h4>
+<input placeholder="Name" @bind="newName" />
+<input placeholder="Email" @bind="newEmail" />
+<button @onclick="SaveUser">@(editingUser == null ? "Add User" : "Save Changes")</button>
+@if (editingUser != null)
+{
+    <button @onclick="CancelEdit">Cancel</button>
+}
+
+<h4>Users List</h4>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in LibraryService.GetUsers())
+        {
+            <tr>
+                <td>@user.Id</td>
+                <td>@user.Name</td>
+                <td>@user.Email</td>
+                <td>
+                    <button @onclick="() => StartEdit(user)">Edit</button>
+                    <button @onclick="() => DeleteUser(user.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    string newName = "", newEmail = "";
+    User? editingUser = null;
+
+    void SaveUser()
+    {
+        if (editingUser == null)
+        {
+            LibraryService.AddUser(new User { Name = newName, Email = newEmail });
+        }
+        else
+        {
+            editingUser.Name = newName;
+            editingUser.Email = newEmail;
+            LibraryService.EditUser(editingUser);
+            editingUser = null;
+        }
+        newName = newEmail = "";
+    }
+
+    void StartEdit(User user)
+    {
+        editingUser = user;
+        newName = user.Name;
+        newEmail = user.Email;
+    }
+
+    void CancelEdit()
+    {
+        editingUser = null;
+        newName = newEmail = "";
+    }
+
+    void DeleteUser(int id)
+    {
+        LibraryService.DeleteUser(id);
+    }
+}

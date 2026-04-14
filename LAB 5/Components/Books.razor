@@ -1,0 +1,85 @@
+﻿@page "/books"
+@using Data
+@inject LAB_5.Services.ILibraryService LibraryService
+@rendermode InteractiveServer
+
+<h3>Book Management</h3>
+
+<h4>@(editingBook == null ? "Add Book" : "Edit Book")</h4>
+<input placeholder="Title" @bind="newTitle" />
+<input placeholder="Author" @bind="newAuthor" />
+<input placeholder="ISBN" @bind="newISBN" />
+<button @onclick="SaveBook">@(editingBook == null ? "Add Book" : "Save Changes")</button>
+@if (editingBook != null)
+{
+    <button @onclick="CancelEdit">Cancel</button>
+}
+
+<h4>Books List</h4>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>ISBN</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in LibraryService.GetBooks())
+        {
+            <tr>
+                <td>@book.Id</td>
+                <td>@book.Title</td>
+                <td>@book.Author</td>
+                <td>@book.ISBN</td>
+                <td>
+                    <button @onclick="() => StartEdit(book)">Edit</button>
+                    <button @onclick="() => DeleteBook(book.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    string newTitle = "", newAuthor = "", newISBN = "";
+    Book? editingBook = null;
+
+    void SaveBook()
+    {
+        if (editingBook == null)
+        {
+            LibraryService.AddBook(new Book { Title = newTitle, Author = newAuthor, ISBN = newISBN });
+        }
+        else
+        {
+            editingBook.Title = newTitle;
+            editingBook.Author = newAuthor;
+            editingBook.ISBN = newISBN;
+            LibraryService.EditBook(editingBook);
+            editingBook = null;
+        }
+        newTitle = newAuthor = newISBN = "";
+    }
+
+    void StartEdit(Book book)
+    {
+        editingBook = book;
+        newTitle = book.Title;
+        newAuthor = book.Author;
+        newISBN = book.ISBN;
+    }
+
+    void CancelEdit()
+    {
+        editingBook = null;
+        newTitle = newAuthor = newISBN = "";
+    }
+
+    void DeleteBook(int id)
+    {
+        LibraryService.DeleteBook(id);
+    }
+}

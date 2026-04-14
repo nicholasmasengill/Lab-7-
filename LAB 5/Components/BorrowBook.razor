@@ -1,0 +1,49 @@
+﻿@page "/borrow"
+@inject LAB_5.Services.ILibraryService LibraryService
+@rendermode InteractiveServer
+
+<h3>Borrow a Book</h3>
+
+<label>Select Book:</label>
+<select @bind="selectedBookId">
+    <option value="0">-- Select a Book --</option>
+    @foreach (var book in LibraryService.GetBooks())
+    {
+        <option value="@book.Id">@book.Title by @book.Author</option>
+    }
+</select>
+
+<label>Select User:</label>
+<select @bind="selectedUserId">
+    <option value="0">-- Select a User --</option>
+    @foreach (var user in LibraryService.GetUsers())
+    {
+        <option value="@user.Id">@user.Name</option>
+    }
+</select>
+
+<button @onclick="SubmitBorrow">Borrow Book</button>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    int selectedBookId = 0;
+    int selectedUserId = 0;
+    string message = "";
+
+    void SubmitBorrow()
+    {
+        if (selectedBookId == 0 || selectedUserId == 0)
+        {
+            message = "Please select both a book and a user.";
+            return;
+        }
+        LibraryService.BorrowBook(selectedBookId, selectedUserId);
+        message = "Book borrowed successfully!";
+        selectedBookId = 0;
+        selectedUserId = 0;
+    }
+}
