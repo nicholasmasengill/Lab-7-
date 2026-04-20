@@ -1,5 +1,5 @@
 name: build and test
-
+# CI workflow for Lab 7
 on:
   push:
     branches: [ main ]
