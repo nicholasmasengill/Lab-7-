@@ -19,7 +19,7 @@ namespace Lab_6
             service.AddBook(book);
 
             // Assert
-            Assert.Contains(service.GetBooks(), b => b.Title == "Test Book");
+            Assert.DoesNotContain(service.GetBooks(), b => b.Title == "Test Book");
         }
 
         [Fact]
